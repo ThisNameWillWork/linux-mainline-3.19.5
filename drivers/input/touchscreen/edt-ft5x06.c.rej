@@ -1,0 +1,24 @@
+--- edt-ft5x06.c
++++ edt-ft5x06.c
+@@ -823,16 +840,17 @@
+ 	 * to have garbage in there
+ 	 */
+ 	memset(rdbuf, 0, sizeof(rdbuf));
+-	error = edt_ft5x06_ts_readwrite(client, 1, "\xbb",
++	error = edt_ft5x06_ts_readwrite(client, 1, "\xBB",
+ 					EDT_NAME_LEN - 1, rdbuf);
+ 	if (error)
+ 		return error;
+ 
+-	/* if we find something consistent, stay with that assumption
+-	 * at least M09 won't send 3 bytes here
++	/* probe content for something consistent.
++	 * M06 starts with a response byte, M12 gives the data directly.
++	 * M09/Generic does not provide model number information.
+ 	 */
+ 	if (!(strnicmp(rdbuf + 1, "EP0", 3))) {
+-		tsdata->version = M06;
++		tsdata->version = EDT_M06;
+ 
+ 		/* remove last '$' end marker */
+ 		rdbuf[EDT_NAME_LEN - 1] = '\0';

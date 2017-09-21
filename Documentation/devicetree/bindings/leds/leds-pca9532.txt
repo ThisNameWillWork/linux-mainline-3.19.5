@@ -1,0 +1,57 @@
+NXP PCA9532 LED (incl. GPIO) controller
+
+Required properties:
+- compatible: must be "nxp,pca9530", "nxp,pca9531", "nxp,pca9532", "nxp,pca9533"
+- reg: I2C address
+- gpio-controller: Marks the device node as a GPIO controller.
+- #gpio-cells: Should be 2:
+   1) pin number
+   2) optional parameters:
+      - bit 0 specifies polarity (0 for normal, 1 for inverted)
+- nxp,typecodes: groups of 2 bits for each of the 16 pins:
+  0: None
+  1: LED
+  2: Beep
+  3: GPIO
+- nxp,statecodes: groups of 2 bits for each of the 16 pins:
+  0: off
+  1: on
+  2: pwm0
+  3: pwm1
+
+Optional properties:
+- nxp,psc: array of 2 numbers: PSC values for the two PWM channels (see datasheet)
+- nxp,pwm: array of 2 numbers: PWM values for the two PWM channels (see datasheet)
+
+Properties for LED mode:
+- #address-cells: Should be 1;
+- #size-cells: Should be 0;
+Each led is represented as a sub-node of the nsp,pca9532 device.
+
+LED sub-node properties:
+- label : (optional) see Documentation/devicetree/bindings/leds/common.txt
+- led-invert : set up led to work with inverted polarity. Works only
+  with pins which typecode is 0x1 (see nxp,typecodes above).
+- linux,default-trigger : (optional)
+   see Documentation/devicetree/bindings/leds/common.txt
+- reg : number of LED line (could be from 0 to 1 in pca9530, 0 to 3 in pca9533,
+	0 to 7 in pca9531 or 0 to 15 in pca9532)
+
+Example:
+
+	pca9532: pca9532@60 {
+		compatible = "nxp,pca9532";
+		gpio-controller;
+		#gpio-cells = <2>;
+		nxp,typecodes = <0xffffffff>;
+		nxp,statecodes = <0x00000000>;
+		reg = <0x60>;
+	};
+
+	sd@20098000 {
+		wp-gpios = <&pca9532 5 0>;
+		cd-gpios = <&pca9532 4 0>;
+		cd-inverted;
+		bus-width = <4>;
+		status = "okay";
+	};
